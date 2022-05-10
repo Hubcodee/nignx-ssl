@@ -1,0 +1,44 @@
+- hosts: nginx
+  become: true
+  tasks:
+    - name: "Update packages"
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: "Upgrade all apt packages"
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: Update the repository cache and update package "nginx" to latest version 
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - name: Checking status of nginx server
+      systemd:
+        state: started
+        name: nginx
+
+    - name: Allow nginx http and https
+      ufw:
+        rule: allow
+        name: 'nginx full'
+
+    - name: Reload Firewall
+      ufw:
+        state: reloaded
+
+    - name: Installing certbort
+      apt:
+        name: certbot
+        state: latest
+
+    - name: Installing nginx plugin
+      apt:
+        name: python3-certbot-nginx
+        state: latest
+
+    - name: obtaining ssl certificate
+      shell: "certbot --nginx --non-interactive --agree-tos --domains www.serverin.me --email serverin.devops@gmail.com"
+
+
+
